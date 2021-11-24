@@ -52,7 +52,6 @@ public class VMain extends javax.swing.JFrame {
         bmBorrar = new javax.swing.JMenu();
         bmModificar = new javax.swing.JMenu();
         bmPagar = new javax.swing.JMenu();
-        bmGenerarJSON = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -129,11 +128,6 @@ public class VMain extends javax.swing.JFrame {
         jLabel6.setText("Forma de pago");
 
         cbFormaDePago.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        cbFormaDePago.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbFormaDePagoActionPerformed(evt);
-            }
-        });
 
         etFecha.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         etFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("dd/MM/yyyy"))));
@@ -184,14 +178,6 @@ public class VMain extends javax.swing.JFrame {
             }
         });
         jMenuBar1.add(bmPagar);
-
-        bmGenerarJSON.setText("Generar JSON");
-        bmGenerarJSON.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bmGenerarJSONActionPerformed(evt);
-            }
-        });
-        jMenuBar1.add(bmGenerarJSON);
 
         setJMenuBar(jMenuBar1);
 
@@ -286,10 +272,6 @@ public class VMain extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_bmPagarActionPerformed
 
-    private void bmGenerarJSONActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmGenerarJSONActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_bmGenerarJSONActionPerformed
-
     private void etImporteKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_etImporteKeyTyped
         char num = evt.getKeyChar();
         if (!Character.isDigit(num) && evt.getKeyChar() != KeyEvent.VK_BACK_SPACE && evt.getKeyChar() != KeyEvent.VK_COMMA) {
@@ -305,10 +287,6 @@ public class VMain extends javax.swing.JFrame {
             getToolkit().beep();
         }
     }//GEN-LAST:event_etFechaKeyTyped
-
-    private void cbFormaDePagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFormaDePagoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbFormaDePagoActionPerformed
 
     /**
      * @param args the command line arguments
@@ -349,10 +327,9 @@ public class VMain extends javax.swing.JFrame {
     private javax.swing.JButton bPagar;
     private javax.swing.JMenu bmBorrar;
     private javax.swing.JMenu bmCrear;
-    private javax.swing.JMenu bmGenerarJSON;
     private javax.swing.JMenu bmModificar;
     private javax.swing.JMenu bmPagar;
-    private javax.swing.JComboBox<String> cbFormaDePago;
+    private javax.swing.JComboBox<FormaPago> cbFormaDePago;
     private javax.swing.JFormattedTextField etFecha;
     private javax.swing.JFormattedTextField etImporte;
     private javax.swing.JTextField etNPrestamo;

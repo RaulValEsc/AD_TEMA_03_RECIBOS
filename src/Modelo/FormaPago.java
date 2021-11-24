@@ -72,9 +72,10 @@ public class FormaPago  implements java.io.Serializable {
         this.prestamos = prestamos;
     }
 
-
-
-
+    @Override
+    public String toString() {
+        return this.codigo + " - " + this.descripcion;
+    }
 }
 
 
