@@ -8,7 +8,7 @@
             <column name="N_PRESTAMO" precision="10" scale="6" />
             <generator class="assigned" />
         </id>
-        <many-to-one name="formaPago" class="Modelo.FormaPago" fetch="select">
+        <many-to-one name="formaPago" class="Modelo.FormaPago" lazy="false" fetch="select">
             <column name="CODIGO_FORMA_PAGO" length="3" not-null="true" />
         </many-to-one>
         <property name="fecha" type="date">

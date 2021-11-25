@@ -157,7 +157,7 @@ public class VMain extends javax.swing.JFrame {
         cbFormaDePago.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         etFecha.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        etFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("dd/MM/yyyy"))));
+        etFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("yyyy-MM-dd"))));
         etFecha.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 etFechaKeyTyped(evt);
@@ -282,7 +282,13 @@ public class VMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bmCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmCrearActionPerformed
-        // TODO add your handling code here:
+        BigDecimal bdId = new BigDecimal(listaPrestamos.size()+1);
+        Date fecha = new Date(etFecha.getText());
+        BigDecimal bdImporte = new BigDecimal(etImporte.getText());
+        BigDecimal bdImportePagado = new BigDecimal(0);
+        FormaPago fp = (FormaPago) cbFormaDePago.getSelectedItem();
+        Prestamo p = new Prestamo(bdId,fp,fecha,bdImporte,bdImportePagado);
+        con.anadirPrestamo(p);
     }//GEN-LAST:event_bmCrearActionPerformed
 
     private void bmBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmBorrarActionPerformed
@@ -303,7 +309,7 @@ public class VMain extends javax.swing.JFrame {
 
     private void etFechaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_etFechaKeyTyped
         char dig = evt.getKeyChar();
-        if (!Character.isDigit(dig) && evt.getKeyChar() != KeyEvent.VK_SLASH && evt.getKeyChar() != KeyEvent.VK_BACK_SPACE) {
+        if (!Character.isDigit(dig) && evt.getKeyChar() != KeyEvent.VK_MINUS && evt.getKeyChar() != KeyEvent.VK_BACK_SPACE) {
             evt.consume();
             getToolkit().beep();
         }
@@ -311,7 +317,12 @@ public class VMain extends javax.swing.JFrame {
 
     private void tPrestamosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tPrestamosMouseClicked
         if (tPrestamos.getSelectedRow() != -1) {
-            mostrarRecibos((Prestamo) tPrestamos.getValueAt(tPrestamos.getSelectedRow(), 0));
+            Prestamo p = (Prestamo) tPrestamos.getValueAt(tPrestamos.getSelectedRow(), 0);
+            mostrarRecibos(p);
+            etNPrestamo.setText(p.getNPrestamo().toString());
+            etFecha.setText(p.getFecha().toString());
+            etImporte.setText(p.getImporte().toString());
+            cbFormaDePago.setSelectedItem(p.getFormaPago());
         }
     }//GEN-LAST:event_tPrestamosMouseClicked
 
@@ -361,7 +372,7 @@ public class VMain extends javax.swing.JFrame {
         for (Prestamo p : listaPrestamos) {
             Object[] fila = new Object[5];
             fila[0] = p;
-            SimpleDateFormat formatter= new SimpleDateFormat("yyyy/MM/dd");
+            SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
             fila[1] = formatter.format(p.getFecha());
             fila[2] = p.getImporte();
             fila[3] = p.getImportePagado();
@@ -379,7 +390,7 @@ public class VMain extends javax.swing.JFrame {
                 Recibo r = (Recibo) i.next();
                 Object[] fila = new Object[4];
                 fila[0] = r;
-                SimpleDateFormat formatter= new SimpleDateFormat("yyyy/MM/dd");
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
                 fila[1] = formatter.format(r.getFecha());
                 fila[2] = r.getImporte();
                 fila[3] = r.getFechaPagado();
