@@ -5,7 +5,16 @@
  */
 package Vista;
 
+import Controlador.Ctrl_BD;
+import Modelo.FormaPago;
+import Modelo.Prestamo;
+import Modelo.Recibo;
 import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -15,11 +24,23 @@ import javax.swing.table.DefaultTableModel;
  */
 public class VMain extends javax.swing.JFrame {
 
+    DefaultTableModel modeloPrestamo, modeloRecibo;
+    Ctrl_BD con;
+    List<Prestamo> listaPrestamos;
+    List<FormaPago> listaFPago;
+
     /**
      * Creates new form VMain
      */
     public VMain() {
+        con = new Ctrl_BD();
         initComponents();
+        listaFPago = con.cargarFormasPago();
+        listaPrestamos = con.cargarPrestamos();
+        modeloPrestamo = (DefaultTableModel) tPrestamos.getModel();
+        modeloRecibo = (DefaultTableModel) tRecibos.getModel();
+        mostrarFormasPago();
+        mostrarPrestamos();
     }
 
     /**
@@ -51,9 +72,10 @@ public class VMain extends javax.swing.JFrame {
         bmCrear = new javax.swing.JMenu();
         bmBorrar = new javax.swing.JMenu();
         bmModificar = new javax.swing.JMenu();
-        bmPagar = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Gestión de préstamos");
+        setResizable(false);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -74,9 +96,13 @@ public class VMain extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        tPrestamos.setColumnSelectionAllowed(true);
         tPrestamos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tPrestamos.getTableHeader().setReorderingAllowed(false);
+        tPrestamos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tPrestamosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tPrestamos);
         tPrestamos.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         if (tPrestamos.getColumnModel().getColumnCount() > 0) {
@@ -124,6 +150,7 @@ public class VMain extends javax.swing.JFrame {
 
         etNPrestamo.setEditable(false);
         etNPrestamo.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        etNPrestamo.setEnabled(false);
 
         jLabel6.setText("Forma de pago");
 
@@ -139,7 +166,13 @@ public class VMain extends javax.swing.JFrame {
 
         bPagar.setText("Pagar");
         bPagar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        bPagar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bPagarActionPerformed(evt);
+            }
+        });
 
+        etImporte.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         etImporte.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0.00"))));
         etImporte.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -170,14 +203,6 @@ public class VMain extends javax.swing.JFrame {
             }
         });
         jMenuBar1.add(bmModificar);
-
-        bmPagar.setText("Pagar");
-        bmPagar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bmPagarActionPerformed(evt);
-            }
-        });
-        jMenuBar1.add(bmPagar);
 
         setJMenuBar(jMenuBar1);
 
@@ -268,10 +293,6 @@ public class VMain extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_bmModificarActionPerformed
 
-    private void bmPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmPagarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_bmPagarActionPerformed
-
     private void etImporteKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_etImporteKeyTyped
         char num = evt.getKeyChar();
         if (!Character.isDigit(num) && evt.getKeyChar() != KeyEvent.VK_BACK_SPACE && evt.getKeyChar() != KeyEvent.VK_COMMA) {
@@ -287,6 +308,92 @@ public class VMain extends javax.swing.JFrame {
             getToolkit().beep();
         }
     }//GEN-LAST:event_etFechaKeyTyped
+
+    private void tPrestamosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tPrestamosMouseClicked
+        if (tPrestamos.getSelectedRow() != -1) {
+            mostrarRecibos((Prestamo) tPrestamos.getValueAt(tPrestamos.getSelectedRow(), 0));
+        }
+    }//GEN-LAST:event_tPrestamosMouseClicked
+
+    private void bPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bPagarActionPerformed
+        if (tRecibos.getSelectedRow() != -1) {
+            Recibo r = (Recibo) tRecibos.getValueAt(tRecibos.getSelectedRow(), 0);
+            if (r.getFechaPagado() == null) {
+                Date date = new Date(System.currentTimeMillis());
+                r.setFechaPagado(date);
+                Prestamo p = r.getPrestamo();
+                if (!p.getRecibos().isEmpty()) {
+                    Iterator i = p.getRecibos().iterator();
+                    while (i.hasNext()) {
+                        Recibo r1 = (Recibo) i.next();
+                        if(r1.getId()==r.getId()){
+                            p.getRecibos().remove(r1);
+                            p.getRecibos().add(r);
+                            BigDecimal total = new BigDecimal(Double.parseDouble(p.getImportePagado().toString()));
+                            BigDecimal bd1 = new BigDecimal(Double.parseDouble(r.getImporte().toString()));
+                            total = total.add(bd1);
+                            p.setImportePagado(total);
+                            break;
+                        }
+                    }
+                }
+                con.modificarPrestamo(p);
+                for(Prestamo p1 : listaPrestamos){
+                    if(p1.getNPrestamo()==p.getNPrestamo()){
+                        listaPrestamos.remove(p1);
+                        listaPrestamos.add(p);
+                    }
+                }
+                mostrarPrestamos();
+                mostrarRecibos(p);
+            } else {
+                getToolkit().beep();
+                JOptionPane.showMessageDialog(this, "Este recibo ya se encuentra pagado", "Error", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            getToolkit().beep();
+            JOptionPane.showMessageDialog(this, "Selecciona un Recibo en la tabla", "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_bPagarActionPerformed
+
+    private void mostrarPrestamos() {
+        modeloPrestamo.setRowCount(0);
+        for (Prestamo p : listaPrestamos) {
+            Object[] fila = new Object[5];
+            fila[0] = p;
+            SimpleDateFormat formatter= new SimpleDateFormat("yyyy/MM/dd");
+            fila[1] = formatter.format(p.getFecha());
+            fila[2] = p.getImporte();
+            fila[3] = p.getImportePagado();
+            fila[4] = p.getFormaPago().getCodigo();
+
+            modeloPrestamo.addRow(fila);
+        }
+    }
+
+    private void mostrarRecibos(Prestamo p) {
+        modeloRecibo.setRowCount(0);
+        if (!p.getRecibos().isEmpty()) {
+            Iterator i = p.getRecibos().iterator();
+            while (i.hasNext()) {
+                Recibo r = (Recibo) i.next();
+                Object[] fila = new Object[4];
+                fila[0] = r;
+                SimpleDateFormat formatter= new SimpleDateFormat("yyyy/MM/dd");
+                fila[1] = formatter.format(r.getFecha());
+                fila[2] = r.getImporte();
+                fila[3] = r.getFechaPagado();
+                modeloRecibo.addRow(fila);
+            }
+        }
+    }
+
+    private void mostrarFormasPago() {
+        cbFormaDePago.removeAllItems();
+        for (FormaPago fp : listaFPago) {
+            cbFormaDePago.addItem(fp);
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -328,7 +435,6 @@ public class VMain extends javax.swing.JFrame {
     private javax.swing.JMenu bmBorrar;
     private javax.swing.JMenu bmCrear;
     private javax.swing.JMenu bmModificar;
-    private javax.swing.JMenu bmPagar;
     private javax.swing.JComboBox<FormaPago> cbFormaDePago;
     private javax.swing.JFormattedTextField etFecha;
     private javax.swing.JFormattedTextField etImporte;

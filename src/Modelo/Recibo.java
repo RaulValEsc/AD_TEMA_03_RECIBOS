@@ -68,9 +68,8 @@ public class Recibo implements java.io.Serializable {
         this.fechaPagado = fechaPagado;
     }
 
-
-
-
+    @Override
+    public String toString() {
+        return "" + getId().getNRecibo();
+    }
 }
-
-

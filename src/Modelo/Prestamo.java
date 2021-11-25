@@ -13,12 +13,12 @@ import java.util.Set;
 public class Prestamo  implements java.io.Serializable {
 
 
-     private BigDecimal NPrestamo;
-     private FormaPago formaPago;
-     private Date fecha;
-     private BigDecimal importe;
-     private BigDecimal importePagado;
-     private Set recibos = new HashSet(0);
+    private BigDecimal NPrestamo;
+    private FormaPago formaPago;
+    private Date fecha;
+    private BigDecimal importe;
+    private BigDecimal importePagado;
+    private Set recibos = new HashSet(0);
 
     public Prestamo() {
     }
@@ -83,9 +83,9 @@ public class Prestamo  implements java.io.Serializable {
         this.recibos = recibos;
     }
 
-
-
+    @Override
+    public String toString() {
+        return this.NPrestamo+"";
+    }
 
 }
-
-

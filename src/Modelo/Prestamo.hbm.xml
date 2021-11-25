@@ -20,7 +20,7 @@
         <property name="importePagado" type="big_decimal">
             <column name="IMPORTE_PAGADO" precision="12" not-null="true" />
         </property>
-        <set name="recibos" table="RECIBO" inverse="true" lazy="true" fetch="select">
+        <set name="recibos" table="RECIBO" inverse="true" lazy="false" fetch="select" cascade="all">
             <key>
                 <column name="N_PRESTAMO" precision="10" scale="6" not-null="true" />
             </key>

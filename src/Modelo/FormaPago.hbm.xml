@@ -17,11 +17,5 @@
         <property name="interes" type="big_decimal">
             <column name="INTERES" precision="5" not-null="true" />
         </property>
-        <set name="prestamos" table="PRESTAMO" inverse="true" lazy="true" fetch="select">
-            <key>
-                <column name="CODIGO_FORMA_PAGO" length="3" not-null="true" />
-            </key>
-            <one-to-many class="Modelo.Prestamo" />
-        </set>
     </class>
 </hibernate-mapping>
