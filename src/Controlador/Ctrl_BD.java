@@ -7,6 +7,7 @@ package Controlador;
 
 import Modelo.FormaPago;
 import Modelo.Prestamo;
+import java.math.BigDecimal;
 import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -81,6 +82,16 @@ public class Ctrl_BD {
             cerrarOperacion();
         }
         return true;
+    }
+    
+    public Double getMaxId(List<Prestamo> lista){
+        Double aux = 0.0;
+        for(Prestamo p : lista){
+            if(Double.parseDouble(p.getNPrestamo().toString())>aux){
+                aux = Double.parseDouble(p.getNPrestamo().toString());
+            }
+        }
+        return aux+1;
     }
     
     private void iniciaOperacion() throws HibernateException {

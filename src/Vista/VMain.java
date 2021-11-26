@@ -11,10 +11,13 @@ import Modelo.Prestamo;
 import Modelo.Recibo;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -52,6 +55,7 @@ public class VMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuItem3 = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         jScrollPane1 = new javax.swing.JScrollPane();
         tPrestamos = new javax.swing.JTable();
@@ -69,9 +73,12 @@ public class VMain extends javax.swing.JFrame {
         bPagar = new javax.swing.JButton();
         etImporte = new javax.swing.JFormattedTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
-        bmCrear = new javax.swing.JMenu();
-        bmBorrar = new javax.swing.JMenu();
-        bmModificar = new javax.swing.JMenu();
+        bmOpciones = new javax.swing.JMenu();
+        bmCrear = new javax.swing.JMenuItem();
+        bmBorrar = new javax.swing.JMenuItem();
+        bmModificar = new javax.swing.JMenuItem();
+
+        jMenuItem3.setText("jMenuItem3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Gestión de préstamos");
@@ -180,13 +187,15 @@ public class VMain extends javax.swing.JFrame {
             }
         });
 
+        bmOpciones.setText("Gestión");
+
         bmCrear.setText("Crear");
         bmCrear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 bmCrearActionPerformed(evt);
             }
         });
-        jMenuBar1.add(bmCrear);
+        bmOpciones.add(bmCrear);
 
         bmBorrar.setText("Borrar");
         bmBorrar.addActionListener(new java.awt.event.ActionListener() {
@@ -194,7 +203,7 @@ public class VMain extends javax.swing.JFrame {
                 bmBorrarActionPerformed(evt);
             }
         });
-        jMenuBar1.add(bmBorrar);
+        bmOpciones.add(bmBorrar);
 
         bmModificar.setText("Modificar");
         bmModificar.addActionListener(new java.awt.event.ActionListener() {
@@ -202,7 +211,9 @@ public class VMain extends javax.swing.JFrame {
                 bmModificarActionPerformed(evt);
             }
         });
-        jMenuBar1.add(bmModificar);
+        bmOpciones.add(bmModificar);
+
+        jMenuBar1.add(bmOpciones);
 
         setJMenuBar(jMenuBar1);
 
@@ -281,24 +292,6 @@ public class VMain extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void bmCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmCrearActionPerformed
-        BigDecimal bdId = new BigDecimal(listaPrestamos.size()+1);
-        Date fecha = new Date(etFecha.getText());
-        BigDecimal bdImporte = new BigDecimal(etImporte.getText());
-        BigDecimal bdImportePagado = new BigDecimal(0);
-        FormaPago fp = (FormaPago) cbFormaDePago.getSelectedItem();
-        Prestamo p = new Prestamo(bdId,fp,fecha,bdImporte,bdImportePagado);
-        con.anadirPrestamo(p);
-    }//GEN-LAST:event_bmCrearActionPerformed
-
-    private void bmBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmBorrarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_bmBorrarActionPerformed
-
-    private void bmModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmModificarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_bmModificarActionPerformed
-
     private void etImporteKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_etImporteKeyTyped
         char num = evt.getKeyChar();
         if (!Character.isDigit(num) && evt.getKeyChar() != KeyEvent.VK_BACK_SPACE && evt.getKeyChar() != KeyEvent.VK_COMMA) {
@@ -322,7 +315,7 @@ public class VMain extends javax.swing.JFrame {
             etNPrestamo.setText(p.getNPrestamo().toString());
             etFecha.setText(p.getFecha().toString());
             etImporte.setText(p.getImporte().toString());
-            cbFormaDePago.setSelectedItem(p.getFormaPago());
+            cbFormaDePago.setSelectedItem((FormaPago)p.getFormaPago());
         }
     }//GEN-LAST:event_tPrestamosMouseClicked
 
@@ -337,7 +330,7 @@ public class VMain extends javax.swing.JFrame {
                     Iterator i = p.getRecibos().iterator();
                     while (i.hasNext()) {
                         Recibo r1 = (Recibo) i.next();
-                        if(r1.getId()==r.getId()){
+                        if (r1.getId() == r.getId()) {
                             p.getRecibos().remove(r1);
                             p.getRecibos().add(r);
                             BigDecimal total = new BigDecimal(Double.parseDouble(p.getImportePagado().toString()));
@@ -349,8 +342,8 @@ public class VMain extends javax.swing.JFrame {
                     }
                 }
                 con.modificarPrestamo(p);
-                for(Prestamo p1 : listaPrestamos){
-                    if(p1.getNPrestamo()==p.getNPrestamo()){
+                for (Prestamo p1 : listaPrestamos) {
+                    if (p1.getNPrestamo() == p.getNPrestamo()) {
                         listaPrestamos.remove(p1);
                         listaPrestamos.add(p);
                     }
@@ -367,12 +360,85 @@ public class VMain extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_bPagarActionPerformed
 
+    private void bmModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmModificarActionPerformed
+        if (!etFecha.getText().isEmpty() && !etImporte.getText().isEmpty() && !etNPrestamo.getText().isEmpty()) {
+            BigDecimal bdId = new BigDecimal(etNPrestamo.getText().replace(",", "."));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date fecha = new Date();
+            try {
+                fecha = formatter.parse(etFecha.getText());
+            } catch (ParseException ex) {
+                System.out.println("ERROR : " + ex.getMessage());
+            }
+            BigDecimal bdImporte = new BigDecimal(etImporte.getText().replace(",", "."));
+            BigDecimal bdImportePagado = new BigDecimal(0);
+            FormaPago fp = (FormaPago) cbFormaDePago.getSelectedItem();
+            Prestamo p = new Prestamo(bdId, fp, fecha, bdImporte, bdImportePagado);
+            if (con.modificarPrestamo(p)) {
+                listaPrestamos = con.cargarPrestamos();
+                mostrarPrestamos();
+                modeloRecibo.setRowCount(0);
+            } else {
+                getToolkit().beep();
+                JOptionPane.showMessageDialog(this, "Error al modificar el prestamo", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            getToolkit().beep();
+            JOptionPane.showMessageDialog(this, "Para modificar es necesario introducir el id, la fecha y el importe del préstamo", "Error", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_bmModificarActionPerformed
+
+    private void bmBorrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmBorrarActionPerformed
+        if (tPrestamos.getSelectedRow() != -1) {
+            Prestamo p = (Prestamo) tPrestamos.getValueAt(tPrestamos.getSelectedRow(), 0);
+            con.borrarPrestamo(p);
+            for (Prestamo p1 : listaPrestamos) {
+                if (p1.getNPrestamo() == p.getNPrestamo()) {
+                    listaPrestamos.remove(p1);
+                }
+            }
+            mostrarPrestamos();
+            modeloRecibo.setRowCount(0);
+        }else{
+            getToolkit().beep();
+            JOptionPane.showMessageDialog(this, "Selecciona un Préstamo para borrar");
+        }
+    }//GEN-LAST:event_bmBorrarActionPerformed
+
+    private void bmCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bmCrearActionPerformed
+        if (!etFecha.getText().isEmpty() && !etImporte.getText().isEmpty()) {
+            BigDecimal bdId = new BigDecimal(con.getMaxId(listaPrestamos));
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date fecha = new Date();
+            try {
+                fecha = formatter.parse(etFecha.getText());
+            } catch (ParseException ex) {
+                System.out.println("ERROR : " + ex.getMessage());
+            }
+            BigDecimal bdImporte = new BigDecimal(etImporte.getText().replace(",", "."));
+            BigDecimal bdImportePagado = new BigDecimal(0);
+            FormaPago fp = (FormaPago) cbFormaDePago.getSelectedItem();
+            Prestamo p = new Prestamo(bdId, fp, fecha, bdImporte, bdImportePagado);
+            if (con.anadirPrestamo(p)) {
+                listaPrestamos = con.cargarPrestamos();
+                mostrarPrestamos();
+                modeloRecibo.setRowCount(0);
+            } else {
+                getToolkit().beep();
+                JOptionPane.showMessageDialog(this, "Error al añadir el prestamo", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            getToolkit().beep();
+            JOptionPane.showMessageDialog(this, "Para añadir es necesario introducir la fecha y el importe del préstamo", "Error", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_bmCrearActionPerformed
+
     private void mostrarPrestamos() {
         modeloPrestamo.setRowCount(0);
         for (Prestamo p : listaPrestamos) {
             Object[] fila = new Object[5];
             fila[0] = p;
-            SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             fila[1] = formatter.format(p.getFecha());
             fila[2] = p.getImporte();
             fila[3] = p.getImportePagado();
@@ -390,7 +456,7 @@ public class VMain extends javax.swing.JFrame {
                 Recibo r = (Recibo) i.next();
                 Object[] fila = new Object[4];
                 fila[0] = r;
-                SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 fila[1] = formatter.format(r.getFecha());
                 fila[2] = r.getImporte();
                 fila[3] = r.getFechaPagado();
@@ -443,9 +509,10 @@ public class VMain extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bPagar;
-    private javax.swing.JMenu bmBorrar;
-    private javax.swing.JMenu bmCrear;
-    private javax.swing.JMenu bmModificar;
+    private javax.swing.JMenuItem bmBorrar;
+    private javax.swing.JMenuItem bmCrear;
+    private javax.swing.JMenuItem bmModificar;
+    private javax.swing.JMenu bmOpciones;
     private javax.swing.JComboBox<FormaPago> cbFormaDePago;
     private javax.swing.JFormattedTextField etFecha;
     private javax.swing.JFormattedTextField etImporte;
@@ -457,6 +524,7 @@ public class VMain extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
